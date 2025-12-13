@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ru.alxpro.scriptable-http-client-light</groupId>
+  <artifactId>main.pom</artifactId>
+  <version>${revision}</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>main</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.test.skip>true</maven.test.skip>
+
+    <!-- project -->
+    <!-- revision in file project.properties -->
+    <!-- <revision>0.1.0</revision>-->
+    <mainClass/>
+    <!--suppress UnresolvedMavenProperty -->
+    <jar.output>${main.basedir}/build</jar.output>
+    <docker-from>bellsoft/liberica-runtime-container:jre-11-musl</docker-from>
+    <!-- /project -->
+
+    <!-- SonarQube -->
+    <sonar.inclusions>**/*.java</sonar.inclusions>
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    <!-- /SonarQube -->
+
+    <!-- plugins -->
+    <maven-compiler-plugin.v>3.13.0</maven-compiler-plugin.v>
+    <maven-jar-plugin.v>3.2.0</maven-jar-plugin.v>
+    <maven-dependency-plugin.v>3.2.0</maven-dependency-plugin.v>
+    <maven-antrun-plugin.v>3.0.0</maven-antrun-plugin.v>
+    <maven-assembly-plugin.v>3.3.0</maven-assembly-plugin.v>
+    <maven-surefire-plugin.v>3.0.0-M5</maven-surefire-plugin.v>
+    <sonar-maven-plugin.v>3.9.1.2184</sonar-maven-plugin.v>
+    <jacoco-maven-plugin.v>0.8.7</jacoco-maven-plugin.v>
+    <docker-maven-plugin.v>0.48.0</docker-maven-plugin.v>
+    <!-- /plugins -->
+
+    <!-- plugins dependencies -->
+    <javax.servlet-api.v>4.0.1</javax.servlet-api.v>
+    <!-- /plugins dependencies -->
+
+    <slf4j-log4j12.v>1.7.32</slf4j-log4j12.v>
+    <commons-cli.v>1.5.0</commons-cli.v>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>local-repository</id>
+      <repositories>
+        <repository>
+          <id>local-repository</id>
+          <!--suppress UnresolvedMavenProperty -->
+          <url>file://${main.basedir}/.mvn/local-repository</url>
+          <snapshots>
+            <checksumPolicy>ignore</checksumPolicy>
+          </snapshots>
+          <releases>
+            <checksumPolicy>ignore</checksumPolicy>
+          </releases>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>local-plugin-repository</id>
+          <!--suppress UnresolvedMavenProperty -->
+          <url>file://${main.basedir}/.mvn/local-repository</url>
+          <snapshots>
+            <checksumPolicy>ignore</checksumPolicy>
+          </snapshots>
+          <releases>
+            <checksumPolicy>ignore</checksumPolicy>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- org.slf4j/slf4j-log4j12 -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j-log4j12.v}</version>
+      </dependency>
+      <!-- commons-cli/commons-cli -->
+      <dependency>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>${commons-cli.v}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <!--suppress UnresolvedMavenProperty -->
+    <finalName>${NewFinalName}</finalName>
+
+    <pluginManagement>
+      <plugins>
+        <!-- maven-compiler-plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.v}</version>
+        </plugin>
+        <!-- assembly-plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.v}</version>
+          <configuration>
+            <appendAssemblyId>false</appendAssemblyId>
+            <descriptors>
+              <!--suppress UnresolvedMavenProperty -->
+              <descriptor>${main.basedir}/assembly.xml</descriptor>
+            </descriptors>
+            <outputDirectory>${jar.output}</outputDirectory>
+            <archive>
+              <addMavenDescriptor>false</addMavenDescriptor>
+              <manifest>
+                <mainClass>${mainClass}</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
+          <executions>
+            <execution>
+              <id>assemble-all</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- maven-antrun-plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${maven-antrun-plugin.v}</version>
+        </plugin>
+        <!-- docker-maven-plugin -->
+        <!-- https://dmp.fabric8.io/#introduction -->
+        <plugin>
+          <groupId>io.fabric8</groupId>
+          <artifactId>docker-maven-plugin</artifactId>
+          <version>${docker-maven-plugin.v}</version>
+          <executions>
+            <execution>
+              <id>save-image</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build</goal>
+                <goal>save</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <saveFile>
+              ${jar.output}/docker-images/${project.build.finalName}.tgz
+            </saveFile>
+            <images>
+              <image>
+                <name>${project.artifactId}:${project.version}</name>
+                <build>
+                  <from>${docker-from}</from>
+                  <workdir>/app</workdir>
+                  <entryPoint>
+                    <exec>
+                      <arg>java</arg>
+                      <arg>-jar</arg>
+                      <arg>${project.build.finalName}.jar</arg>
+                    </exec>
+                  </entryPoint>
+                  <assembly>
+                    <mode>dir</mode>
+                    <targetDir>/app</targetDir>
+                    <inline>
+                      <fileSets>
+                        <fileSet>
+                          <directory>${jar.output}</directory>
+                          <outputDirectory>.</outputDirectory>
+                          <includes>
+                            <include>${project.build.finalName}.jar</include>
+                          </includes>
+                        </fileSet>
+                      </fileSets>
+                    </inline>
+                  </assembly>
+                </build>
+              </image>
+            </images>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!-- directory-maven-plugin -->
+      <plugin>
+        <groupId>org.commonjava.maven.plugins</groupId>
+        <artifactId>directory-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>directories</id>
+            <goals>
+              <goal>highest-basedir</goal>
+            </goals>
+            <phase>initialize</phase>
+            <configuration>
+              <property>main.basedir</property>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- properties-maven-plugin -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <!--suppress UnresolvedMavenProperty -->
+                <file>${main.basedir}/project.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- jar-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.v}</version>
+        <configuration>
+          <outputDirectory>${jar.output}</outputDirectory>
+          <archive>
+            <addMavenDescriptor>false</addMavenDescriptor>
+            <manifest>
+              <mainClass>${mainClass}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <!-- dependency-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.v}</version>
+        <configuration>
+          <outputDirectory>${jar.output}/ext</outputDirectory>
+        </configuration>
+      </plugin>
+      <!-- surefire-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.v}</version>
+        <configuration>
+          <includes>
+            <include>**/*Test.*</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <!-- sonar-maven-plugin -->
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${sonar-maven-plugin.v}</version>
+        <dependencies>
+          <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${javax.servlet-api.v}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <!-- jacoco-maven-plugin -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.v}</version>
+      </plugin>
+      <!-- build-helper-maven-plugin -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <value>${project.artifactId}</value>
+              <regex>\.</regex>
+              <replacement>\/</replacement>
+              <name>NewFinalName</name>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

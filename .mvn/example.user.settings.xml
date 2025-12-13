@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- IMPORTANT: user.settings.xml file not under version control -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+  <!-- NEED ABSOLUTE PATH !!! -->
+  <localRepository>.mvn\repository</localRepository>
+  <!-- <offline>true</offline>-->
+  <profiles>
+    <profile>
+      <id>downloadSources</id>
+      <properties>
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+      </properties>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>downloadSources</activeProfile>
+  </activeProfiles>
+  <servers>
+    <server>
+      <id>nexus-public</id>
+      <username>username</username>
+      <password>password</password>
+    </server>
+  </servers>
+</settings>

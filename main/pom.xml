@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>ru.alxpro.scriptable-http-client-light</groupId>
+    <artifactId>main.pom</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+  <artifactId>main</artifactId>
+  <packaging>jar</packaging>
+
+  <properties>
+    <mainClass>ru.alxpro.scriptable_http_client_light.Main</mainClass>
+    <mainName>scriptable_http_client_light</mainName>
+
+    <logback.version>1.5.13</logback.version>
+    <gson.version>2.13.2</gson.version>
+    <nashorn.version>15.4</nashorn.version>
+    <jsonpath.version>2.9.0</jsonpath.version>
+    <jline.version>3.25.1</jline.version>
+    <jna.version>5.14.0</jna.version>
+
+    <!-- Java 11 (Jakarta EE 9) -->
+    <jaxws.version>3.0.2</jaxws.version>
+    <jakarta.version>3.0.1</jakarta.version>
+    <jakarta.activation.version>2.0.1</jakarta.activation.version>
+    <jersey.version>3.1.5</jersey.version>
+  </properties>
+
+  <dependencies>
+    <!-- Logging (Logback + SLF4J) -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+    <!-- Gson for JSON Serialization -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
+    </dependency>
+    <!-- JAX-WS (SOAP Server implementation) -->
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-rt</artifactId>
+      <version>${jaxws.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>${jakarta.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.activation</groupId>
+      <artifactId>jakarta.activation-api</artifactId>
+      <version>${jakarta.activation.version}</version>
+    </dependency>
+    <!-- JAX-RS (REST Server Implementation via Jersey + JDK HttpServer) -->
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-jdk-http</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <!-- JAX-RS Client (Jersey) -->
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <!-- (Optional) For detailed logging -->
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-binding</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <!-- JsonPath -->
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>${jsonpath.version}</version>
+    </dependency>
+    <!-- Standalone Nashorn Engine -->
+    <dependency>
+      <groupId>org.openjdk.nashorn</groupId>
+      <artifactId>nashorn-core</artifactId>
+      <version>${nashorn.version}</version>
+    </dependency>
+    <!-- JLine for Terminal handling -->
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline-terminal-jna</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>${jna.version}</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>docker-images</id>
+      <build>
+        <plugins>
+          <!-- docker-maven-plugin -->
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+              <saveFile>
+                ${jar.output}/${mainName}-${project.version}-img.tgz
+              </saveFile>
+              <images>
+                <image>
+                  <name>${mainName}:${project.version}</name>
+                  <build>
+                    <assembly>
+                      <inline>
+                        <fileSets>
+                          <fileSet>
+                            <directory>${jar.output}</directory>
+                            <outputDirectory>.</outputDirectory>
+                            <includes>
+                              <include>${project.build.finalName}.jar</include>
+                            </includes>
+                          </fileSet>
+                          <fileSet>
+                            <directory>${basedir}/scripts</directory>
+                            <outputDirectory>scripts</outputDirectory>
+                          </fileSet>
+                          <fileSet>
+                            <directory>${basedir}</directory>
+                            <outputDirectory>.</outputDirectory>
+                            <includes>
+                              <include>config.properties</include>
+                            </includes>
+                          </fileSet>
+                        </fileSets>
+                      </inline>
+                    </assembly>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <build>
+    <!--suppress UnresolvedMavenProperty -->
+    <finalName>
+      ${NewFinalName}/${mainName}-${project.version}
+    </finalName>
+
+    <plugins>
+      <!-- assembly-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+      <!-- maven-compiler-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <!-- maven-antrun-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <copy todir="${jar.output}/${project.artifactId}">
+                  <fileset dir="${basedir}" includes="scripts/*"/>
+                  <fileset file="${basedir}/config.properties"/>
+                  <fileset file="${basedir}/inc.logback.xml"/>
+                </copy>
+                <zip destfile="${jar.output}/${mainName}-${project.version}-dist.zip">
+                  <zipfileset dir="${basedir}/scripts" prefix="dist-scripts"/>
+                  <zipfileset file="${basedir}/dist-config.properties"/>
+                  <zipfileset file="${basedir}/dist-inc.logback.xml"/>
+                  <fileset file="${jar.output}/${project.build.finalName}.jar"/>
+                </zip>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

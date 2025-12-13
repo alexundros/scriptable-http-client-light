@@ -1,0 +1,4 @@
+<!-- THIS FILE IN USER HOME .m2 DIRECTORY -->
+<settingsSecurity>
+    <master>{password hash}</master>
+</settingsSecurity>

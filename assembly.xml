@@ -1,0 +1,20 @@
+<assembly>
+  <id>all</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory/>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>true</unpack>
+    </dependencySet>
+  </dependencySets>
+  <fileSets>
+    <fileSet>
+      <directory>${build.directory}/classes</directory>
+      <outputDirectory/>
+    </fileSet>
+  </fileSets>
+</assembly>
