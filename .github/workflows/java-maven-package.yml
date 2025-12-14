@@ -2,9 +2,10 @@ name: Java Maven Package
 
 on:
     workflow_dispatch:
+    workflow_call:
 
 jobs:
-  build-and-release:
+  java-maven-package:
     runs-on: ubuntu-latest
 
     steps:
